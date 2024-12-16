@@ -1,0 +1,40 @@
+<!-- pages/tracks/tracks.wxml -->
+<view class="container">
+  <view class="header">
+    <text class="title">轨迹记录</text>
+  </view>
+
+  <view class="track-list">
+    <block wx:if="{{tracks.length > 0}}">
+      <view class="track-item" wx:for="{{tracks}}" wx:key="filePath">
+        <view class="track-info">
+          <text class="track-name">记录 {{item.mediaId}}</text>
+          <text class="track-date">{{item.date}}</text>
+        </view>
+        <view class="track-actions">
+          <button 
+            class="btn-action"
+            size="mini" 
+            bindtap="onExportTrack" 
+            data-filepath="{{item.filePath}}">
+            导出
+          </button>
+          <button 
+            class="btn-action btn-delete"
+            size="mini" 
+            bindtap="onDeleteTrack"
+            data-filepath="{{item.filePath}}">
+            删除
+          </button>
+        </view>
+      </view>
+    </block>
+    <view class="empty-state" wx:else>
+      <text>暂无轨迹记录</text>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

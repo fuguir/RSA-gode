@@ -1,0 +1,46 @@
+<view class="container">
+  <view class="form-container">
+    <view class="form-item">
+      <text class="label">路段名称</text>
+      <input class="input" 
+             type="text" 
+             placeholder="请输入路段名称"
+             value="{{sectionName}}"
+             bindinput="onNameInput"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">初始桩号（公里）</text>
+      <input class="input" 
+             type="digit" 
+             placeholder="请输入初始桩号"
+             value="{{initialStake}}"
+             bindinput="onStakeInput"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">桩号方向</text>
+      <radio-group class="direction-group" bindchange="onDirectionChange">
+        <label class="radio-label">
+          <radio value="increase" checked="{{direction === 'increase'}}"/>增加
+        </label>
+        <label class="radio-label">
+          <radio value="decrease" checked="{{direction === 'decrease'}}"/>减少
+        </label>
+      </radio-group>
+    </view>
+
+    <view class="form-item location-info">
+      <text class="label">当前位置</text>
+      <view class="location-detail">
+        <text>经度：{{longitude}}</text>
+        <text>纬度：{{latitude}}</text>
+      </view>
+    </view>
+
+    <view class="button-group">
+      <button class="btn-cancel" bindtap="onCancel">取消</button>
+      <button class="btn-confirm" bindtap="onConfirm">确认</button>
+    </view>
+  </view>
+</view>

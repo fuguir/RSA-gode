@@ -1,0 +1,51 @@
+.container {
+    padding: 20rpx;
+  }
+  
+  .header {
+    text-align: center;
+    padding: 20rpx 0;
+  }
+  
+  .title {
+    font-size: 36rpx;
+    font-weight: bold;
+  }
+  
+  .main {
+    margin-top: 40rpx;
+  }
+  
+  .btn-primary {
+    background-color: #07c160;
+    color: white;
+    margin: 20rpx 0;
+  }
+  
+  .status-panel {
+    margin-top: 40rpx;
+    padding: 20rpx;
+    background-color: #f8f8f8;
+    border-radius: 8rpx;
+  }
+  
+  .status-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    margin-bottom: 20rpx;
+    display: block;
+  }
+  
+  .status-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10rpx 0;
+  }
+  
+  .status-good {
+    color: #07c160;
+  }
+  
+  .status-bad {
+    color: #ff4d4f;
+  }

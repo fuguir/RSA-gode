@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="header">
+    <text class="title">路段视频记录</text>
+  </view>
+
+  <view class="main">
+    <button class="btn-primary" bindtap="onCreateSection">创建新路段</button>
+    <view class="status-panel">
+      <text class="status-title">设备状态</text>
+      <view class="status-item">
+        <text>GPS信号：</text>
+        <text class="{{gpsStatus ? 'status-good' : 'status-bad'}}">
+          {{gpsStatus ? '正常' : '未连接'}}
+        </text>
+      </view>
+      <view class="status-item">
+        <text>当前速度：</text>
+        <text>{{speed}} km/h</text>
+      </view>
+    </view>
+  </view>
+</view>
