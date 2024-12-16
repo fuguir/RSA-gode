@@ -1,124 +1,101 @@
 <!-- pages/record/record.wxml -->
-<view class="container">
-  <!-- 状态栏 -->
-  <view class="status-bar">
-    <view class="status-group">
-      <view class="status-item {{bleStatus ? 'active' : ''}}">
-        <text>📱</text>
-        <text>蓝牙{{bleStatus ? '已开启' : '未开启'}}</text>
+<view class="page-container">
+  <!-- 顶部状态区 -->
+  <view class="status-section">
+    <view class="status-item">
+      <view class="status-icon {{gpsStatus ? 'active' : ''}}">
+        <!-- GPS图标 -->
+        <view class="icon-gps"></view>
       </view>
-      <view class="status-item {{connected ? 'active' : ''}}">
-        <text>📹</text>
-        <text>GoPro{{connected ? '已连接' : '未连接'}}</text>
+      <view class="status-info">
+        <text class="status-label">GPS</text>
+        <text class="status-value">{{gpsStatus ? '已连接' : '未连接'}}</text>
+        <text class="status-detail" wx:if="{{accuracy}}">±{{accuracy}}m</text>
       </view>
-      <view class="status-item {{gpsStatus ? 'active' : ''}}">
-        <text>📍</text>
-        <text>GPS({{satellites}})</text>
+    </view>
+
+    <view class="status-item">
+      <view class="status-icon {{connected ? 'active' : ''}}">
+        <!-- 蓝牙图标 -->
+        <view class="icon-bluetooth"></view>
+      </view>
+      <view class="status-info">
+        <text class="status-label">相机</text>
+        <text class="status-value">{{statusText}}</text>
+      </view>
+    </view>
+
+    <view class="status-item">
+      <view class="status-icon">
+        <!-- 卫星图标 -->
+        <view class="icon-satellite"></view>
+      </view>
+      <view class="status-info">
+        <text class="status-label">卫星数</text>
+        <text class="status-value">{{satellites || 0}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 信息显示区 -->
-  <view class="info-section">
-    <!-- 桩号显示 -->
-    <view class="stake-row">
-      <view class="stake-panel">
-        <view class="stake-value">K{{showStake}}</view>
-        <view class="direction-indicator {{isIncreasing ? 'up' : 'down'}}">
-          {{isIncreasing ? '↑' : '↓'}}
-        </view>
-      </view>
-      <button class="calibrate-btn" bindtap="onCalibrateStake">校准桩号</button>
-    </view>
-
-    <!-- 地图显示 -->
-    <view class="map-panel">
-      <map 
-        wx:if="{{locationReady}}"
-        id="trackMap"
-        class="track-map"
-        latitude="{{mapCenter.latitude}}"
-        longitude="{{mapCenter.longitude}}"
-        scale="{{mapScale}}"
-        show-location
-        show-compass
-        enable-rotate
-        enable-zoom
-        polyline="{{trackPolylines}}"
-        markers="{{mapMarkers}}">
-        
-        <!-- 速度显示 -->
-        <cover-view class="speed-panel">
-          <cover-view class="speed-value">{{showSpeed}}</cover-view>
-          <cover-view class="speed-unit">km/h</cover-view>
-          <cover-view class="accuracy-text" wx:if="{{accuracy}}">
-            精度 ±{{accuracy}}m
-          </cover-view>
-        </cover-view>
-      </map>
-      <view class="map-loading" wx:else>
-        <text>GPS定位中...</text>
-      </view>
-    </view>
-
-    <!-- 统计面板 -->
-    <view class="stats-panel">
-      <view class="stats-grid">
-        <view class="stat-item">
-          <text class="stat-value">{{showDuration}}</text>
-          <text class="stat-label">录制时长</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-value">{{currentChapter}}</text>
-          <text class="stat-label">视频分段</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-value">{{pointCount}}</text>
-          <text class="stat-label">轨迹点数</text>
-        </view>
-        <view class="stat-item">
-          <text class="stat-value">{{totalDistance}}</text>
-          <text class="stat-label">总里程km</text>
-        </view>
-      </view>
+  <!-- 中部地图区 -->
+  <view class="map-section">
+    <map 
+      wx:if="{{locationReady}}"
+      id="trackMap"
+      class="track-map"
+      latitude="{{mapCenter.latitude}}"
+      longitude="{{mapCenter.longitude}}"
+      scale="{{mapScale}}"
+      show-location
+      show-compass
+      enable-rotate
+      enable-zoom
+      polyline="{{trackPolylines}}"
+      markers="{{mapMarkers}}">
+      
+      <!-- 速度显示面板 -->
+      <cover-view class="speed-panel">
+        <cover-view class="speed-value">{{showSpeed}}</cover-view>
+        <cover-view class="speed-unit">km/h</cover-view>
+      </cover-view>
+    </map>
+    <view class="map-loading" wx:else>
+      <text>GPS定位中...</text>
     </view>
   </view>
 
-  <!-- 控制面板 -->
-  <view class="control-panel">
-    <block wx:if="{{!connected}}">
-      <button 
-        class="connect-btn {{!bleStatus ? 'disabled' : ''}}"
-        bindtap="onConnect" 
-        disabled="{{!bleStatus}}">
-        连接GoPro
-      </button>
-    </block>
-    <block wx:else>
-      <button 
-        wx:if="{{!isRecording}}"
-        class="direction-btn"
-        bindtap="onToggleDirection">
-        桩号{{isIncreasing ? '递增' : '递减'}}
-      </button>
-      <button 
-        class="record-btn {{isRecording ? 'recording' : ''}} {{(!connected || !gpsStatus) ? 'disabled' : ''}}"
-        bindtap="onRecordToggle"
-        disabled="{{!connected || !gpsStatus}}">
+  <!-- 底部控制区 -->
+  <view class="control-section">
+    <view class="stake-display">
+      <text class="stake-value">{{showStake}}</text>
+      <view class="direction-indicator {{!isIncreasing ? 'down' : ''}}">
+        {{isIncreasing ? '↑' : '↓'}}
+      </view>
+    </view>
+
+    <view class="control-buttons">
+      <!-- 连接按钮 -->
+      <view class="connect-button {{connected ? 'connected' : ''}}" 
+            bindtap="onConnect" 
+            wx:if="{{!connected}}">
+        <view class="icon-bluetooth"></view>
+        <text>连接相机</text>
+      </view>
+      
+      <!-- 录制按钮仅在连接后显示 -->
+      <view class="record-button {{isRecording ? 'recording' : ''}}" 
+            bindtap="onRecordToggle"
+            wx:if="{{connected}}">
         <view class="record-icon"></view>
-        <text>{{isRecording ? '停止录制' : '开始录制'}}</text>
-      </button>
-    </block>
+      </view>
+    </view>
+
+    <view class="function-buttons">
+      <!-- 校准按钮 -->
+      <view class="function-btn" bindtap="onCalibrateStake">
+        <view class="icon-calibrate"></view>
+        <text>校准</text>
+      </view>
+    </view>
   </view>
-</view>
-
-<!-- 错误提示 -->
-<view class="error-toast" wx:if="{{!bleStatus || !gpsStatus}}">
-  <text>{{!bleStatus ? '请开启蓝牙并允许位置权限' : '请允许位置权限以获取GPS信息'}}</text>
-</view>
-
-<!-- 加载提示 -->
-<view class="loading-mask" wx:if="{{isConnecting}}">
-  <view class="loading-spinner"></view>
-  <text>连接中...</text>
 </view>

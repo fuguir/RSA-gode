@@ -8,3 +8,103 @@
   padding: 200rpx 0;
   box-sizing: border-box;
 } 
+
+page {
+  /* 日间模式变量 */
+  --light-primary: #1A73E8;
+  --light-accent: #4285F4;
+  --light-background: #FFFFFF;
+  --light-surface: #F8F9FA;
+  --light-text: #202124;
+  --light-secondary-text: #5F6368;
+  
+  /* 夜间模式变量 */
+  --dark-primary: #8AB4F8;
+  --dark-accent: #4285F4;
+  --dark-background: #202124;
+  --dark-surface: #303134;
+  --dark-text: #E8EAED;
+  --dark-secondary-text: #9AA0A6;
+  
+  /* 动态主题颜色 */
+  --primary-color: var(--dark-primary);
+  --accent-color: var(--dark-accent);
+  --background-color: var(--dark-background);
+  --surface-color: var(--dark-surface);
+  --text-color: var(--dark-text);
+  --secondary-text-color: var(--dark-secondary-text);
+  
+  /* 状态颜色保持不变 */
+  --warning-color: #FF9800;
+  --error-color: #f44336;
+  --success-color: #4CAF50;
+  
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+/* 日间模式类 */
+page.light-theme {
+  --primary-color: var(--light-primary);
+  --accent-color: var(--light-accent);
+  --background-color: var(--light-background);
+  --surface-color: var(--light-surface);
+  --text-color: var(--light-text);
+  --secondary-text-color: var(--light-secondary-text);
+}
+
+/* 图标基础样式 */
+.icon-base {
+  width: 48rpx;
+  height: 48rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* GPS图标 */
+.icon-gps {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E0E0E0'%3E%3Cpath d='M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z'/%3E%3C/svg%3E");
+}
+
+/* 蓝牙图标 */
+.icon-bluetooth {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E0E0E0'%3E%3Cpath d='M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z'/%3E%3C/svg%3E");
+}
+
+/* 卫星图标 */
+.icon-satellite {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E0E0E0'%3E%3Cpath d='M5 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm14 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z'/%3E%3C/svg%3E");
+}
+
+/* 校准图标 */
+.icon-calibrate {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E0E0E0'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z'/%3E%3C/svg%3E");
+}
+
+/* 方向图标 */
+.icon-direction {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E0E0E0'%3E%3Cpath d='M7 14l5-5 5 5H7z'/%3E%3C/svg%3E");
+}
+
+/* 录制按钮图标 */
+.record-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.recording .record-icon {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 4rpx;
+}
+
+/* 激活状态的图标样式 */
+.status-icon.active .icon-gps,
+.status-icon.active .icon-bluetooth {
+  filter: drop-shadow(0 0 8rpx var(--accent-color));
+}

@@ -119,28 +119,25 @@
   /* 速度显示样式 */
   .speed-panel {
     position: absolute;
-    top: 24rpx;
-    right: 24rpx;
-    background: rgba(42, 42, 42, 0.9);
-    border-radius: 16rpx;
-    padding: 16rpx 24rpx;
+    top: 40rpx;
+    left: 40rpx;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 180rpx;
   }
   
   .speed-value {
-    font-size: 64rpx;
-    font-weight: 500;
-    color: #4CAF50;
+    font-size: 96rpx;
+    font-weight: 600;
+    color: var(--text-color);
+    text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.5);
     line-height: 1;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   }
   
   .speed-unit {
     font-size: 24rpx;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-color);
+    opacity: 0.7;
     margin-top: 4rpx;
   }
   
@@ -332,4 +329,220 @@
   
   @keyframes pulse {
     50% { transform: scale(1.05); }
+  }
+  
+  /* 页面容器 */
+  .page-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #212121;
+    color: #E0E0E0;
+  }
+  
+  /* 顶部状态区 */
+  .status-section {
+    height: 20vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20rpx;
+    background: rgba(26, 35, 126, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  .status-item {
+    display: flex;
+    align-items: center;
+    padding: 20rpx;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
+  }
+  
+  .status-icon {
+    width: 64rpx;
+    height: 64rpx;
+    margin-right: 16rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .status-icon.active {
+    background: rgba(3, 169, 244, 0.2);
+    box-shadow: 0 0 20rpx rgba(3, 169, 244, 0.3);
+  }
+  
+  .status-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .status-label {
+    font-size: 24rpx;
+    opacity: 0.7;
+  }
+  
+  .status-value {
+    font-size: 28rpx;
+    font-weight: 500;
+  }
+  
+  .status-detail {
+    font-size: 20rpx;
+    opacity: 0.5;
+  }
+  
+  /* 中部地图区 */
+  .map-section {
+    height: 50vh;
+    position: relative;
+    background: #000;
+    overflow: hidden;
+    border-radius: 24rpx;
+    margin: 20rpx;
+  }
+  
+  .track-map {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .speed-panel {
+    position: absolute;
+    top: 40rpx;
+    left: 40rpx;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20rpx 40rpx;
+    border-radius: 16rpx;
+    backdrop-filter: blur(10px);
+  }
+  
+  .speed-value {
+    font-size: 80rpx;
+    font-weight: 600;
+    color: #03A9F4;
+    text-shadow: 0 0 20rpx rgba(3, 169, 244, 0.5);
+  }
+  
+  .speed-unit {
+    font-size: 24rpx;
+    opacity: 0.7;
+  }
+  
+  /* 底部控制区 */
+  .control-section {
+    height: 30vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20rpx;
+    background: rgba(26, 35, 126, 0.2);
+    backdrop-filter: blur(10px);
+  }
+  
+  .stake-display {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20rpx 40rpx;
+    border-radius: 16rpx;
+  }
+  
+  .stake-value {
+    font-size: 64rpx;
+    font-weight: 600;
+    color: #03A9F4;
+    margin-right: 20rpx;
+  }
+  
+  .direction-indicator {
+    font-size: 48rpx;
+    color: #4CAF50;
+  }
+  
+  .direction-indicator.down {
+    color: #f44336;
+  }
+  
+  .control-buttons {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .record-button {
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: 50%;
+    background: #f44336;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 30rpx rgba(244, 67, 54, 0.5);
+    transition: all 0.3s ease;
+  }
+  
+  .record-button.recording {
+    background: #FF9800;
+    box-shadow: 0 0 30rpx rgba(255, 152, 0, 0.5);
+  }
+  
+  .function-buttons {
+    display: flex;
+    gap: 40rpx;
+  }
+  
+  .function-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20rpx;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16rpx;
+    transition: all 0.3s ease;
+  }
+  
+  .function-btn:active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(0.95);
+  }
+  
+  .function-btn text {
+    font-size: 24rpx;
+    margin-top: 8rpx;
+    opacity: 0.7;
+  }
+  
+  /* 连接按钮样式 */
+  .connect-button {
+    display: flex;
+    align-items: center;
+    padding: 20rpx 40rpx;
+    background: var(--primary-color);
+    border-radius: 40rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .connect-button .icon-bluetooth {
+    margin-right: 12rpx;
+  }
+  
+  .connect-button text {
+    color: var(--text-color);
+    font-size: 28rpx;
+  }
+  
+  .connect-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+  }
+  
+  .connect-button.connected {
+    background: var(--success-color);
   }

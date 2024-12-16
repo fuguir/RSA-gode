@@ -1,7 +1,7 @@
 // utils/gps.js
 
 class GpsManager {
-    static MIN_SPEED = 0.55; // 最小速度阈值 2km/h ≈ 0.55m/s
+    static MIN_SPEED = 0.28; // 最小速度阈值 1km/h ≈ 0.28m/s
     static POSITION_THRESHOLD = 2; // 位置变化阈值(米)
     
     constructor() {
@@ -129,16 +129,16 @@ class GpsManager {
           timestamp: Date.now()
         });
         
-        // 只保留最近的3个点
-        if (this.positionBuffer.length > 3) {
+        // 只保留最近的5个点(增加平滑窗口)
+        if (this.positionBuffer.length > 5) {
           this.positionBuffer.shift();
         }
   
         // 3. 计算平滑速度
         let speed = 0;
-        if (this.positionBuffer.length >= 2) {
+        if (this.positionBuffer.length >= 3) { // 至少需要3个点
           const timeSpan = (this.positionBuffer[this.positionBuffer.length - 1].timestamp - 
-                           this.positionBuffer[0].timestamp) / 1000; // 转换为秒
+                           this.positionBuffer[0].timestamp) / 1000;
           const totalDistance = this.positionBuffer
             .slice(1)
             .reduce((sum, point) => sum + point.distance, 0);
@@ -148,14 +148,18 @@ class GpsManager {
           }
         }
   
-        // 4. 静止状态判断
+        // 4. 应用速度阈值和平滑
         if (distance < GpsManager.POSITION_THRESHOLD || speed < GpsManager.MIN_SPEED) {
           speed = 0;
+        } else {
+          // 速度平滑处理
+          speed = this.lastValidSpeed * 0.7 + speed * 0.3;
         }
   
         this.lastPosition = res;
-        this.lastValidSpeed = speed > 0 ? speed : this.lastValidSpeed;
+        this.lastValidSpeed = speed;
   
+        // 5. 更新状态
         this.status = {
           accuracy: res.accuracy || 0,
           satellites: res.satellites || 0,
@@ -166,7 +170,7 @@ class GpsManager {
           direction: this.status.direction
         };
   
-        // 通知所有监听器
+        // 通知监听器
         this.statusCallbacks.forEach(callback => {
           try {
             callback(this.status);
