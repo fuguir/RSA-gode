@@ -1,38 +1,51 @@
 <!-- pages/record/record.wxml -->
 <view class="page-container">
-  <!-- 顶部状态区 -->
-  <view class="status-section">
+  <!-- 连接状态区 -->
+  <view class="connection-section">
+    <!-- 蓝牙状态 -->
     <view class="status-item">
-      <view class="status-icon {{gpsStatus ? 'active' : ''}}">
-        <!-- GPS图标 -->
-        <view class="icon-gps"></view>
+      <image class="status-icon" 
+             src="/pages/components/{{connected ? 'bluetooth-active' : 'bluetooth-inactive'}}.svg">
+      </image>
+      <text class="status-text">{{connected ? '已连接' : '未连接'}}</text>
+    </view>
+    
+    <!-- Wi-Fi状态 -->
+    <view class="status-item">
+      <image class="status-icon" 
+             src="/pages/components/{{wifiConnected ? 'wifi-active' : 'wifi-inactive'}}.svg">
+      </image>
+      <text class="status-text">{{wifiConnected ? '已连接' : '未连接'}}</text>
+    </view>
+    
+    <!-- GPS信号强度 -->
+    <view class="status-item">
+      <view class="gps-signal">
+        <view class="signal-bar {{gpsSignalStrength >= 1 ? 'active' : ''}}"></view>
+        <view class="signal-bar {{gpsSignalStrength >= 2 ? 'active' : ''}}"></view>
+        <view class="signal-bar {{gpsSignalStrength >= 3 ? 'active' : ''}}"></view>
+        <view class="signal-bar {{gpsSignalStrength >= 4 ? 'active' : ''}}"></view>
       </view>
-      <view class="status-info">
-        <text class="status-label">GPS</text>
-        <text class="status-value">{{gpsStatus ? '已连接' : '未连接'}}</text>
-        <text class="status-detail" wx:if="{{accuracy}}">±{{accuracy}}m</text>
+      <text class="status-text">GPS</text>
+    </view>
+  </view>
+
+  <!-- 设备状态区 -->
+  <view class="device-section">
+    <view class="device-item">
+      <text class="device-label">GoPro电量：</text>
+      <view class="device-value">
+        <view class="battery-indicator">
+          <view class="battery-level" style="width: {{batteryLevel}}%"></view>
+        </view>
+        <text class="device-text">{{batteryLevel}}%</text>
       </view>
     </view>
-
-    <view class="status-item">
-      <view class="status-icon {{connected ? 'active' : ''}}">
-        <!-- 蓝牙图标 -->
-        <view class="icon-bluetooth"></view>
-      </view>
-      <view class="status-info">
-        <text class="status-label">相机</text>
-        <text class="status-value">{{statusText}}</text>
-      </view>
-    </view>
-
-    <view class="status-item">
-      <view class="status-icon">
-        <!-- 卫星图标 -->
-        <view class="icon-satellite"></view>
-      </view>
-      <view class="status-info">
-        <text class="status-label">卫星数</text>
-        <text class="status-value">{{satellites || 0}}</text>
+    <view class="device-item">
+      <text class="device-label">剩余录制时长：</text>
+      <view class="device-value">
+        <view class="storage-icon"></view>
+        <text class="device-text">{{remainingTime || '2小时'}}</text>
       </view>
     </view>
   </view>
@@ -53,49 +66,63 @@
       polyline="{{trackPolylines}}"
       markers="{{mapMarkers}}">
       
-      <!-- 速度显示面板 -->
-      <cover-view class="speed-panel">
+      <cover-view class="speed-panel" style="position: absolute; left: 10rpx; top: 10rpx; width: 166rpx; display: flex; box-sizing: border-box">
         <cover-view class="speed-value">{{showSpeed}}</cover-view>
         <cover-view class="speed-unit">km/h</cover-view>
       </cover-view>
     </map>
-    <view class="map-loading" wx:else>
-      <text>GPS定位中...</text>
+  </view>
+
+  <!-- 录制信息区 -->
+  <view class="record-info-section">
+    <view class="info-item">
+      <text class="info-value">{{showDuration || '00:00:00'}}</text>
+      <text class="info-label">录制时长</text>
+    </view>
+    <view class="info-item">
+      <text class="info-value">{{totalDistance || '0.0'}}km</text>
+      <text class="info-label">行驶距离</text>
+    </view>
+    <view class="info-item">
+      <text class="info-value">{{calibrationCount || '0'}}</text>
+      <text class="info-label">校正次数</text>
     </view>
   </view>
 
   <!-- 底部控制区 -->
   <view class="control-section">
-    <view class="stake-display">
-      <text class="stake-value">{{showStake}}</text>
-      <view class="direction-indicator {{!isIncreasing ? 'down' : ''}}">
-        {{isIncreasing ? '↑' : '↓'}}
+    <view class="stake-control">
+      <view class="stake-display">
+        <text class="stake-prefix">K</text>
+        <text class="stake-value">{{showStake}}</text>
+        <view class="direction-indicator {{!isIncreasing ? 'down' : ''}}">
+          {{isIncreasing ? '↑' : '↓'}}
+        </view>
       </view>
+      <button class="calibrate-button" bindtap="onCalibrateStake">
+        校准桩号
+      </button>
     </view>
 
-    <view class="control-buttons">
-      <!-- 连接按钮 -->
-      <view class="connect-button {{connected ? 'connected' : ''}}" 
-            bindtap="onConnect" 
-            wx:if="{{!connected}}">
-        <view class="icon-bluetooth"></view>
-        <text>连接相机</text>
-      </view>
-      
-      <!-- 录制按钮仅在连接后显示 -->
-      <view class="record-button {{isRecording ? 'recording' : ''}}" 
-            bindtap="onRecordToggle"
-            wx:if="{{connected}}">
-        <view class="record-icon"></view>
-      </view>
-    </view>
-
-    <view class="function-buttons">
-      <!-- 校准按钮 -->
-      <view class="function-btn" bindtap="onCalibrateStake">
-        <view class="icon-calibrate"></view>
-        <text>校准</text>
-      </view>
+    <view class="action-buttons">
+      <block wx:if="{{!connected}}">
+        <view class="connect-button" bindtap="onConnect">
+          <view class="icon-bluetooth"></view>
+          <text>连接GoPro</text>
+        </view>
+      </block>
+      <block wx:elif="{{!isRecording}}">
+        <view class="record-button start" bindtap="onRecordToggle">
+          <view class="record-icon"></view>
+          <text>开始录制</text>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="record-button stop" bindtap="onRecordToggle">
+          <view class="record-icon"></view>
+          <text>停止录制</text>
+        </view>
+      </block>
     </view>
   </view>
 </view>

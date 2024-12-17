@@ -79,6 +79,7 @@ Page({
     trackPolylines: [],    // 轨迹分段数组
     batchUpdateTimer: null,    // 批量更新定时器
     pendingUpdates: {},        // 待更新数据
+    isDarkMode: true, // 默认使用暗色主题
   },
 
   onLoad: function(options) {
@@ -130,6 +131,17 @@ Page({
     this.statusTimer = setInterval(() => {
       this.updateStatus();
     }, 1000);
+
+    // 获取系统主题
+    wx.getSystemInfo({
+      success: (res) => {
+        const isDark = res.theme === 'dark';
+        this.setData({ isDarkMode: isDark });
+        if(!isDark) {
+          this.toggleTheme();
+        }
+      }
+    });
   },
 
   // 初始化蓝牙
@@ -941,5 +953,33 @@ Page({
     }
   },
 
-
+  // 切换主题
+  toggleTheme: function() {
+    const newMode = !this.data.isDarkMode;
+    this.setData({ isDarkMode: newMode });
+    
+    // 设置全局主题类
+    if(newMode) {
+      wx.setNavigationBarColor({
+        frontColor: '#ffffff',
+        backgroundColor: '#202124'
+      });
+    } else {
+      wx.setNavigationBarColor({
+        frontColor: '#000000',
+        backgroundColor: '#ffffff'
+      });
+    }
+    
+    // 更新页面主题类
+    const pages = getCurrentPages();
+    const currentPage = pages[pages.length - 1];
+    if(currentPage) {
+      if(newMode) {
+        currentPage.pageClass = '';
+      } else {
+        currentPage.pageClass = 'light-theme';
+      }
+    }
+  },
 });
