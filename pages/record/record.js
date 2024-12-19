@@ -80,6 +80,10 @@ Page({
     batchUpdateTimer: null,    // 批量更新定时器
     pendingUpdates: {},        // 待更新数据
     isDarkMode: true, // 默认使用暗色主题
+
+    // 新增: 用于速度显示平滑的辅助变量
+    _speedDisplayBuffer: [], // 内部使用的速度显示缓冲
+    _lastSpeedUpdate: 0,    // 上次速度更新时间
   },
 
   onLoad: function(options) {
@@ -376,7 +380,31 @@ Page({
       });
   },
 
-  // 新增：统一处理GPS更新
+  // 新增: 速度显示平滑处理
+  _smoothSpeedDisplay(speed) {
+    const now = Date.now();
+    const UPDATE_INTERVAL = 200; // 控制更新频率(ms)
+    
+    // 添加到缓冲区
+    this.data._speedDisplayBuffer.push(speed);
+    if (this.data._speedDisplayBuffer.length > 3) {
+      this.data._speedDisplayBuffer.shift();
+    }
+
+    // 计算平滑值
+    const smoothedSpeed = this.data._speedDisplayBuffer.reduce((a, b) => a + b, 0) 
+                         / this.data._speedDisplayBuffer.length;
+
+    // 控制更新频率
+    if (now - this.data._lastSpeedUpdate >= UPDATE_INTERVAL) {
+      this.data._lastSpeedUpdate = now;
+      return smoothedSpeed;
+    }
+    
+    return null; // 返回 null 表示不需要更新显示
+  },
+
+  // 修改: GPS更新处理方法 - 保持原有结构,优化内部实现
   _handleGpsUpdate: function(status) {
     if (!status.latitude || !status.longitude) return;
   
@@ -402,16 +430,24 @@ Page({
     const accuracy = status.accuracy || 0;
     const formattedAccuracy = Number(accuracy).toFixed(3);
   
-    // 实时更新的数据（不受采样影响）
+    // 处理速度显示
+    const instantSpeedKmh = (status.speed || 0) * 3.6;
+    const smoothedSpeed = this._smoothSpeedDisplay(instantSpeedKmh);
+    
+    // 构建更新对象
     const updates = {
       'currentLocation.latitude': status.latitude,
       'currentLocation.longitude': status.longitude,
-      showSpeed: ((status.speed || 0) * 3.6).toFixed(1),
       accuracy: formattedAccuracy,
       satellites: status.satellites || 0,
       gpsUpdateTime: Date.now(),
-      instantSpeed: (status.speed || 0) * 3.6
+      instantSpeed: instantSpeedKmh
     };
+
+    // 只在需要时更新显示速度
+    if (smoothedSpeed !== null) {
+      updates.showSpeed = smoothedSpeed.toFixed(1);
+    }
 
     // 只在录制状态下更新桩号显示
     if (this.data.isRecording && point?.stake) {
@@ -958,7 +994,7 @@ Page({
     const newMode = !this.data.isDarkMode;
     this.setData({ isDarkMode: newMode });
     
-    // 设置全局主题类
+    // ��置全局主题类
     if(newMode) {
       wx.setNavigationBarColor({
         frontColor: '#ffffff',

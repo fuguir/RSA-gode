@@ -1,7 +1,8 @@
 // utils/gps.js
+import KalmanFilter from './kalman-filter';
 
 class GpsManager {
-    static MIN_SPEED = 0.28; // 最小速度阈值 1km/h ≈ 0.28m/s
+    static MIN_SPEED = 0.5; // 最小速度阈值 1km/h ≈ 0.28m/s
     static POSITION_THRESHOLD = 2; // 位置变化阈值(米)
     
     constructor() {
@@ -16,6 +17,9 @@ class GpsManager {
         speed: 0,
         currentStake: null
       };
+      this.kalmanFilter = new KalmanFilter();
+      this.speedBuffer = [];
+      this.SPEED_BUFFER_SIZE = 5;
     }
   
     // 获取当前状态（同步方法）
@@ -111,74 +115,102 @@ class GpsManager {
   
     // 内部方法：处理位置更新
     _handleLocationChange(res) {
-        // 1. 计算位置变化
-        let distance = 0;
-        if (this.lastPosition) {
-          distance = this._calculateDistance(
-            this.lastPosition.latitude,
-            this.lastPosition.longitude,
-            res.latitude,
-            res.longitude
-          );
-        }
-  
-        // 2. 更新位置缓冲
-        this.positionBuffer.push({
-          position: res,
-          distance: distance,
-          timestamp: Date.now()
-        });
-        
-        // 只保留最近的5个点(增加平滑窗口)
-        if (this.positionBuffer.length > 5) {
-          this.positionBuffer.shift();
-        }
-  
-        // 3. 计算平滑速度
-        let speed = 0;
-        if (this.positionBuffer.length >= 3) { // 至少需要3个点
-          const timeSpan = (this.positionBuffer[this.positionBuffer.length - 1].timestamp - 
-                           this.positionBuffer[0].timestamp) / 1000;
-          const totalDistance = this.positionBuffer
-            .slice(1)
-            .reduce((sum, point) => sum + point.distance, 0);
-          
-          if (timeSpan > 0) {
-            speed = totalDistance / timeSpan;
-          }
-        }
-  
-        // 4. 应用速度阈值和平滑
-        if (distance < GpsManager.POSITION_THRESHOLD || speed < GpsManager.MIN_SPEED) {
-          speed = 0;
-        } else {
-          // 速度平滑处理
-          speed = this.lastValidSpeed * 0.7 + speed * 0.3;
-        }
-  
-        this.lastPosition = res;
-        this.lastValidSpeed = speed;
-  
-        // 5. 更新状态
-        this.status = {
-          accuracy: res.accuracy || 0,
-          satellites: res.satellites || 0,
-          speed: speed,
-          currentStake: this._calculateStake(res),
-          latitude: res.latitude,
-          longitude: res.longitude,
-          direction: this.status.direction
-        };
-  
-        // 通知监听器
-        this.statusCallbacks.forEach(callback => {
-          try {
-            callback(this.status);
-          } catch (error) {
-            console.error('状态通知回调执行失败:', error);
-          }
-        });
+      const timestamp = Date.now();
+      
+      // 1. 卡尔曼滤波预测
+      this.kalmanFilter.predict(timestamp);
+      
+      // 2. 更新滤波器测量值
+      const measurement = [
+        res.latitude,
+        res.longitude,
+        res.speed * Math.cos(res.heading || 0),  // 分解速度到 x 方向
+        res.speed * Math.sin(res.heading || 0)   // 分解速度到 y 方向
+      ];
+      this.kalmanFilter.update(measurement);
+      
+      // 3. 获取滤波后的状态
+      const filteredState = this.kalmanFilter.getState();
+      
+      // 4. 计算平滑速度
+      const smoothedSpeed = this._smoothSpeed(filteredState.speed);
+      
+      // 5. 更新位置缓冲区 - 保持原有逻辑
+      let distance = 0;
+      if (this.lastPosition) {
+        distance = this._calculateDistance(
+          this.lastPosition.latitude,
+          this.lastPosition.longitude,
+          filteredState.position.latitude,
+          filteredState.position.longitude
+        );
       }
+
+      this.positionBuffer.push({
+        position: filteredState.position,
+        distance: distance,
+        timestamp: timestamp,
+        speed: smoothedSpeed
+      });
+      
+      if (this.positionBuffer.length > 5) {
+        this.positionBuffer.shift();
+      }
+
+      // 6. 速度有效性检查和更新
+      if (!this._isValidSpeed(smoothedSpeed) || distance < this.POSITION_THRESHOLD) {
+        smoothedSpeed = 0;
+      }
+
+      this.lastPosition = filteredState.position;
+      this.lastValidSpeed = smoothedSpeed;
+
+      // 7. 构造返回结果 - 保持原有数据结构
+      return {
+        ...res,
+        latitude: filteredState.position.latitude,
+        longitude: filteredState.position.longitude,
+        speed: smoothedSpeed,
+        accuracy: res.accuracy,
+        satellites: res.satellites
+      };
+    }
+  
+    // 新增: 速度平滑处理
+    _smoothSpeed(speed) {
+      this.speedBuffer.push(speed);
+      if (this.speedBuffer.length > this.SPEED_BUFFER_SIZE) {
+        this.speedBuffer.shift();
+      }
+
+      // 使用加权移动平均
+      const weights = [0.1, 0.15, 0.2, 0.25, 0.3]; // 权重之和为1
+      let smoothedSpeed = 0;
+      const bufferLength = this.speedBuffer.length;
+      
+      for (let i = 0; i < bufferLength; i++) {
+        smoothedSpeed += this.speedBuffer[i] * weights[i + (weights.length - bufferLength)];
+      }
+
+      return smoothedSpeed;
+    }
+  
+    // 新增: 速度有效性检查
+    _isValidSpeed(speed) {
+      // 基础检查
+      if (speed < 0 || !Number.isFinite(speed)) return false;
+      
+      // 突变检查
+      if (this.lastValidSpeed && Math.abs(speed - this.lastValidSpeed) > 5) {
+        return false;
+      }
+      
+      // 合理范围检查 (0-200km/h)
+      const speedKmh = speed * 3.6;
+      if (speedKmh > 200) return false;
+      
+      return true;
+    }
   
     // 内部方法：计算桩号
     _calculateStake(position) {

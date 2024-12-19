@@ -25,6 +25,12 @@ class TrackManager {
       this.lastValidPoint = null;    // 上一个有效点
       this.direction = 1;            // 桩号方向(1:递增,-1:递减)
       this.initialStake = null;      // 初始桩号
+      
+      // 新增: 速度处理相关属性
+      this._speedSmoothingFactor = 0.3;  // 速度平滑因子
+      this._maxAcceleration = 2.78;      // 最大加速度 (10 km/h per second)
+      this._lastSpeed = 0;
+      this._lastSpeedTimestamp = 0;
     }
     
     // 开始新的记录
@@ -54,11 +60,10 @@ class TrackManager {
     addTrackPoint(position, speed) {
         if (!this.recording) return null;
         
-        // 速度转换为km/h并检查阈值
-        const speedKmh = speed * 3.6;
-        if (speedKmh < TrackManager.MIN_SPEED) {
-          speed = 0;
-        }
+        const now = Date.now();
+        
+        // 速度有效性检查和平滑处理
+        speed = this._processSpeed(speed, now);
           
         let updatedDistance = 0;
         if (speed > 0 && this.lastValidPoint && position && position.latitude) {
@@ -70,8 +75,14 @@ class TrackManager {
             position.longitude
           );
           
-          // 只有移动距离超过阈值才更新累计距离
-          if (distance >= TrackManager.MIN_UPDATE_DISTANCE) {
+          // 基于速度和时间的距离合理性检查
+          const timeSpan = (now - this._lastSpeedTimestamp) / 1000;
+          const theoreticalDistance = this._lastSpeed * timeSpan;
+          const distanceRatio = distance / theoreticalDistance;
+          
+          // 只有移动距离在合理范围内才更新累计距离
+          if (distance >= this.MIN_UPDATE_DISTANCE && 
+              distanceRatio >= 0.5 && distanceRatio <= 1.5) {
             this.accumulatedDistance += distance;
             updatedDistance = distance;
             this.lastValidPoint = position;
@@ -80,19 +91,23 @@ class TrackManager {
           this.lastValidPoint = position;
         }
 
+        // 更新速度状态
+        this._lastSpeed = speed;
+        this._lastSpeedTimestamp = now;
+
         // 获取当前桩号
         let currentStake;
         // 如果有最近的校准点，使用校准点的桩号
         const lastCalibration = this.calibrations[this.calibrations.length - 1];
         if (lastCalibration && 
-            Date.now() - lastCalibration.timestamp < 2000) { // 校准后2秒内使用校准值
+            now - lastCalibration.timestamp < 2000) { // 校准后2秒内使用校准值
             currentStake = lastCalibration.stake;
         } else {
             currentStake = this._calculateStake(updatedDistance);
         }
           
         const point = {
-          timestamp: Date.now(),
+          timestamp: now,
           latitude: position.latitude || 0,
           longitude: position.longitude || 0,
           speed: speed || 0,
@@ -377,6 +392,41 @@ class TrackManager {
         } catch (e) {
             console.error('保存轨迹状态失败:', e);
         }
+    }
+    
+    // 新增: 速度处理方法
+    _processSpeed(speed, timestamp) {
+        // 1. 基础速度检查
+        if (speed < 0 || !Number.isFinite(speed)) {
+            return 0;
+        }
+
+        // 2. 加速度检查
+        if (this._lastSpeedTimestamp) {
+            const timeSpan = (timestamp - this._lastSpeedTimestamp) / 1000;
+            const acceleration = Math.abs(speed - this._lastSpeed) / timeSpan;
+            
+            if (acceleration > this._maxAcceleration) {
+                // 使用最大允许加速度限制速度变化
+                const maxSpeedChange = this._maxAcceleration * timeSpan;
+                speed = this._lastSpeed + 
+                       Math.sign(speed - this._lastSpeed) * maxSpeedChange;
+            }
+        }
+
+        // 3. 速度平滑处理
+        if (this._lastSpeed !== null) {
+            speed = this._lastSpeed * (1 - this._speedSmoothingFactor) + 
+                   speed * this._speedSmoothingFactor;
+        }
+
+        // 4. 最小速度阈值检查
+        const speedKmh = speed * 3.6;
+        if (speedKmh < this.MIN_SPEED) {
+            return 0;
+        }
+
+        return speed;
     }
   }
   
