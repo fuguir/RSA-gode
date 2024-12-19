@@ -412,7 +412,7 @@ Page({
       gpsUpdateTime: Date.now(),
       instantSpeed: (status.speed || 0) * 3.6,
       // 添加总距离更新 - 从最新采样点获取累计距离并转换为千米
-      totalDistance: (point?.distance ? (point.distance / 1000).toFixed(2) : '0.0')
+      totalDistance: (point?.distance ? (point.distance / 1000).toFixed(1) : '0.0')
     };
 
     // 只在录制状态下更新桩号显示
