@@ -1,80 +1,230 @@
 .container {
-    padding: 30rpx;
-  }
-  
-  .form-container {
-    background-color: #fff;
-    border-radius: 12rpx;
-    padding: 20rpx;
-  }
-  
-  .form-item {
-    margin-bottom: 30rpx;
-  }
-  
-  .label {
-    display: block;
-    font-size: 28rpx;
-    color: #333;
-    margin-bottom: 10rpx;
-  }
-  
-  .input {
-    width: 100%;
-    height: 80rpx;
-    border: 2rpx solid #ddd;
-    border-radius: 8rpx;
-    padding: 0 20rpx;
-    box-sizing: border-box;
-    font-size: 28rpx;
-  }
-  
-  .direction-group {
-    display: flex;
-    padding: 20rpx 0;
-  }
-  
-  .radio-label {
-    margin-right: 40rpx;
-    font-size: 28rpx;
-  }
-  
-  .location-info {
-    background-color: #f8f8f8;
-    padding: 20rpx;
-    border-radius: 8rpx;
-  }
-  
-  .location-detail {
-    font-size: 28rpx;
-    color: #666;
-    display: flex;
-    flex-direction: column;
-    gap: 10rpx;
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 40rpx;
-    gap: 20rpx;
-  }
-  
-  .btn-cancel, .btn-confirm {
-    flex: 1;
-    height: 80rpx;
-    line-height: 80rpx;
-    text-align: center;
-    border-radius: 8rpx;
-    font-size: 28rpx;
-  }
-  
-  .btn-cancel {
-    background-color: #f5f5f5;
-    color: #666;
-  }
-  
-  .btn-confirm {
-    background-color: #07c160;
-    color: #fff;
-  }
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 32rpx;
+  box-sizing: border-box;
+  background: #f5f5f5;
+}
+
+.form-container {
+  width: 92%;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 表单项通用样式 */
+.form-item {
+  margin-bottom: 36rpx;
+  position: relative;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+/* 输入框样式 */
+.input {
+  width: 100%;
+  height: 80rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.char-count {
+  position: absolute;
+  right: 24rpx;
+  bottom: 24rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 选择器样式 */
+.picker-content {
+  height: 80rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.picker-content.placeholder {
+  color: #999;
+}
+
+.arrow-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+/* 道路类型选择 */
+.type-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  margin: 0;
+}
+
+.type-option {
+  padding: 16rpx 24rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #666;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.type-option.active {
+  background: #07c160;
+  color: #fff;
+}
+
+/* 方向说明 */
+.direction-info {
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  padding: 24rpx;
+}
+
+.direction-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 8rpx 0;
+  position: relative;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.direction-item:last-child {
+  margin-bottom: 0;
+}
+
+.direction-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 16rpx;
+}
+
+.direction-item text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.direction-item.selected {
+  background: rgba(7, 193, 96, 0.1);
+  border: 2rpx solid #07c160;
+}
+
+/* 长度信息 */
+.length-info {
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  min-height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.length-placeholder {
+  font-size: 28rpx;
+  color: #999;
+  font-style: italic;
+}
+
+/* 底部按钮组 */
+.button-group {
+  margin-top: 48rpx;
+  padding: 24rpx 0;
+  display: flex;
+  gap: 24rpx;
+  width: 92%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.btn-cancel, .btn-confirm {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 12rpx;
+  font-size: 32rpx;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-confirm {
+  background: #07c160;
+  color: #fff;
+}
+
+.btn-confirm[disabled] {
+  background: #a8e6c1;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 按钮点击效果 */
+.btn-cancel:active {
+  background: #eee;
+}
+
+.btn-confirm:active:not([disabled]) {
+  background: #06ae56;
+}
+
+/* 添加方向选择样式 */
+.direction-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.direction-option {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  transition: all 0.3s;
+}
+
+.direction-option.active {
+  background: rgba(7, 193, 96, 0.1);
+  border: 2rpx solid #07c160;
+}
+
+.direction-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 16rpx;
+}

@@ -1,144 +1,94 @@
 // pages/create/create.js
+import SectionManager from '../../utils/section-manager';
+
 Page({
-    data: {
-      sectionName: '',
-      initialStake: '',
-      direction: 'increase',
-      latitude: '',
-      longitude: '',
+  data: {
+    formData: {
+      name: '',
+      region: ['', ''],
+      type: '',
+      direction: ''
     },
-  
-    onLoad: function() {
-      this.startLocationUpdate();
-    },
-  
-    startLocationUpdate: async function() {
-      try {
-        // 确保有位置权限
-        const setting = await wx.getSetting();
-        if (!setting.authSetting['scope.userLocation']) {
-          await wx.authorize({
-            scope: 'scope.userLocation'
-          });
-        }
-  
-        // 开启位置更新
-        await wx.startLocationUpdate();
-        
-        // 监听位置变化
-        wx.onLocationChange((res) => {
-          this.setData({
-            latitude: res.latitude.toFixed(6),
-            longitude: res.longitude.toFixed(6)
-          });
-        });
-      } catch (err) {
-        console.error('开启位置更新失败：', err);
-        if (err.errno === 103) {
-          wx.showModal({
-            title: '需要位置权限',
-            content: '请在设置中开启位置权限，以便计算速度和桩号',
-            confirmText: '去设置', 
-            success: (res) => {
-              if (res.confirm) {
-                wx.openSetting();
-              }
-            }
-          });
-        } else {
-          wx.showToast({
-            title: '获取位置失败',
-            icon: 'none'
-          });
-        }
-      }
-    },
-  
-    onNameInput: function(e) {
-      this.setData({
-        sectionName: e.detail.value
-      });
-    },
-  
-    onStakeInput: function(e) {
-      this.setData({
-        initialStake: e.detail.value
-      });
-    },
-  
-    onDirectionChange: function(e) {
-      this.setData({
-        direction: e.detail.value
-      });
-    },
-  
-    validateForm: function() {
-      if (!this.data.sectionName.trim()) {
-        wx.showToast({
-          title: '请输入路段名称',
-          icon: 'none'
-        });
-        return false;
-      }
-  
-      if (!this.data.initialStake) {
-        wx.showToast({
-          title: '请输入初始桩号',
-          icon: 'none'
-        });
-        return false;
-      }
-  
-      const stake = parseFloat(this.data.initialStake);
-      if (isNaN(stake) || stake < 0) {
-        wx.showToast({
-          title: '请输入有效的桩号',
-          icon: 'none'
-        });
-        return false;
-      }
-  
-      return true;
-    },
-  
-    onConfirm: function() {
-      if (!this.validateForm()) return;
-  
-      // 准备路段数据
+    roadTypes: [
+      { label: '高速公路', value: 'highway' },
+      { label: '普通公路', value: 'normal' },
+      { label: '城市道路', value: 'urban' },
+      { label: '其他', value: 'other' }
+    ],
+    isFormValid: false,
+    selectedDirection: '', // 'increase' 或 'decrease'
+  },
+
+  // 表单输入处理
+  onNameInput(e) {
+    this.setData({
+      'formData.name': e.detail.value
+    }, this.validateForm);
+  },
+
+  onRegionChange(e) {
+    this.setData({
+      'formData.region': e.detail.value
+    }, this.validateForm);
+  },
+
+  onTypeSelect(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({
+      'formData.type': type
+    }, this.validateForm);
+  },
+
+  // 添加方向选择处理
+  onDirectionSelect(e) {
+    const direction = e.currentTarget.dataset.direction;
+    this.setData({
+      'formData.direction': direction
+    }, this.validateForm);
+  },
+
+  // 表单验证
+  validateForm() {
+    const { name, region, type, direction } = this.data.formData;
+    const isValid = name.trim().length > 0 
+                   && region[0] && region[1]
+                   && type
+                   && direction;
+    
+    this.setData({ isFormValid: isValid });
+  },
+
+  // 取消按钮处理
+  onCancel() {
+    wx.navigateBack();
+  },
+
+  // 确认按钮处理
+  async onConfirm() {
+    if (!this.data.isFormValid) return;
+
+    try {
       const sectionData = {
-        name: this.data.sectionName,
-        initialStake: parseFloat(this.data.initialStake),
-        direction: this.data.direction,
-        startLatitude: this.data.latitude,
-        startLongitude: this.data.longitude,
-        createTime: new Date().getTime()
+        name: this.data.formData.name,
+        province: this.data.formData.region[0],
+        city: this.data.formData.region[1],
+        type: this.data.formData.type,
+        direction: this.data.formData.direction
       };
-  
-      // 保存路段信息到本地存储
-      try {
-        const sections = wx.getStorageSync('sections') || [];
-        sections.push(sectionData);
-        wx.setStorageSync('sections', sections);
-  
-        // 跳转到录制页面
-        wx.navigateTo({
-          url: '/pages/record/record?id=' + (sections.length - 1)
-        });
-      } catch (e) {
-        console.error('保存路段信息失败：', e);
-        wx.showToast({
-          title: '保存失败',
-          icon: 'none'
-        });
-      }
-    },
-  
-    onCancel: function() {
-      wx.navigateBack();
-    },
-  
-    onUnload: function() {
-      // 页面卸载时停止位置更新
-      wx.stopLocationUpdate();
+
+      const sectionId = await SectionManager.createSection(sectionData);
+      
+      // 创建成功后直接跳转到录制页面
+      wx.navigateTo({
+        url: `/pages/record/record?id=${sectionId}&direction=${sectionData.direction}`
+      });
+
+    } catch (error) {
+      console.error('创建路段失败:', error);
+      wx.showToast({
+        title: error.message || '创建失败',
+        icon: 'none'
+      });
     }
-  });
+  }
+});

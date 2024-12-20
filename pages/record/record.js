@@ -4,6 +4,7 @@ import GpsManager from '../../utils/gps';
 import TrackManager from '../../utils/track-manager';
 import TrackDataManager from '../../utils/track-data-manager';
 import utils from '../../utils/utils';
+import SectionManager from '../../utils/section-manager';
 
 // GoPro 命令定义
 const GoProCommands = {

@@ -4,20 +4,17 @@
       "pages/create/create", 
       "pages/record/record"
     ],
-    "requiredPrivateInfos": [
-      "getLocation",
-      "startLocationUpdate",
-      "onLocationChange"
-    ],
-    "permission": {
-      "scope.userLocation": {
-        "desc": "需要获取您的地理位置用于计算桩号和速度"
-      }
-    },
     "window": {
       "backgroundTextStyle": "light",
       "navigationBarBackgroundColor": "#fff", 
       "navigationBarTitleText": "路段视频记录",
       "navigationBarTextStyle": "black"
+    },
+    "style": "v2",
+    "sitemapLocation": "sitemap.json",
+    "permission": {
+      "scope.userLocation": {
+        "desc": "需要获取您的位置信息用于计算速度和桩号"
+      }
     }
   } 

@@ -1,22 +1,67 @@
 <view class="container">
+  <!-- 顶部区域：搜索框和管理工具 -->
   <view class="header">
-    <text class="title">路段视频记录</text>
-  </view>
-
-  <view class="main">
-    <button class="btn-primary" bindtap="onCreateSection">创建新路段</button>
-    <view class="status-panel">
-      <text class="status-title">设备状态</text>
-      <view class="status-item">
-        <text>GPS信号：</text>
-        <text class="{{gpsStatus ? 'status-good' : 'status-bad'}}">
-          {{gpsStatus ? '正常' : '未连接'}}
-        </text>
+    <!-- 搜索栏 -->
+    <view class="search-bar">
+      <input 
+        class="search-input" 
+        placeholder="搜索路段名称" 
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+      />
+    </view>
+    
+    <!-- 管理工具栏 -->
+    <view class="manage-bar">
+      <view class="left-tools">
+        <view class="checkbox-wrap" bindtap="onToggleSelectAll">
+          <image class="checkbox-icon" src="/assets/icons/{{isAllSelected ? 'checked' : 'unchecked'}}.png" />
+          <text>全选</text>
+        </view>
       </view>
-      <view class="status-item">
-        <text>当前速度：</text>
-        <text>{{speed}} km/h</text>
+      <view class="right-tools">
+        <view class="batch-delete {{selectedItems.length ? 'active' : ''}}" bindtap="onBatchDelete">
+          <image class="delete-icon" src="/assets/icons/delete.png" />
+          <text>删除</text>
+        </view>
       </view>
     </view>
+  </view>
+
+  <!-- 列表区域 -->
+  <view class="content">
+    <view class="list-content">
+      <view class="list-item" wx:for="{{sections}}" wx:key="id">
+        <view class="item-left">
+          <view class="checkbox-wrap" catchtap="onToggleSelect" data-id="{{item.id}}">
+            <image class="checkbox-icon" src="/assets/icons/{{selectedItems.includes(item.id) ? 'checked' : 'unchecked'}}.png" />
+          </view>
+          <text class="section-name">{{item.name}}</text>
+        </view>
+        <view class="item-right">
+          <text class="create-time">{{item.createTime}}</text>
+          <view class="actions">
+            <view class="action-btn" data-id="{{item.id}}" data-type="track" catchtap="onExportData">
+              <image class="btn-icon" src="/assets/icons/track.png" />
+            </view>
+            <view class="action-btn" data-id="{{item.id}}" data-type="subtitle" catchtap="onExportData">
+              <image class="btn-icon" src="/assets/icons/subtitle.png" />
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 分页控制器 -->
+    <view class="pagination" wx:if="{{totalPages > 1}}">
+      <view class="page-btn {{currentPage <= 1 ? 'disabled' : ''}}" bindtap="onPrevPage">上一页</view>
+      <text class="page-info">{{currentPage}} / {{totalPages}}</text>
+      <view class="page-btn {{currentPage >= totalPages ? 'disabled' : ''}}" bindtap="onNextPage">下一页</view>
+    </view>
+  </view>
+
+  <!-- 添加按钮 -->
+  <view class="create-btn" bindtap="onCreateSection">
+    <image class="btn-icon" src="/assets/icons/add.png" />
   </view>
 </view>
